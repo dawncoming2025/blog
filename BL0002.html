@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C++从入门到进阶-第一个程序 - 曙光将至</title>
+    <link rel="shortcut icon" href="https://cdn.luogu.com.cn/upload/image_hosting/cto5owfw.png" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        nav {
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(74, 85, 104, 0.5);
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        nav .logo {
+            font-size: 1.6rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #63b3ed;
+            text-shadow: 0 0 15px rgba(99, 179, 237, 0.5);
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 1.8rem;
+        }
+
+        nav .nav-links a {
+            color: #cbd5e0;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        nav .nav-links a:hover {
+            color: #fff;
+            background: rgba(99, 179, 237, 0.15);
+        }
+
+        nav .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #63b3ed;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        nav .nav-links a:hover::after {
+            width: 70%;
+        }
+
+        .RoundImg {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(99, 179, 237, 0.5);
+            box-shadow: 0 0 15px rgba(99, 179, 237, 0.3);
+        }
+
+        main {
+            padding: 3rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            flex: 1;
+            width: 100%;
+            display: flex;
+            gap: 30px;
+            position: relative;
+        }
+
+        /* 目录控制按钮 */
+        .toc-toggle {
+            position: fixed;
+            top: 120px;
+            left: 20px;
+            z-index: 150;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4299e1, #63b3ed);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .toc-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(99, 179, 237, 0.5);
+        }
+
+        /* 列表图标 - 纯CSS实现 */
+        .list-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            position: relative;
+        }
+
+        .list-icon::before,
+        .list-icon::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: white;
+            border-radius: 2px;
+        }
+
+        .list-icon::before {
+            top: 6px;
+        }
+
+        .list-icon::after {
+            top: 15px;
+            width: 80%;
+        }
+
+        /* 文章目录样式 */
+        .article-toc {
+            width: 280px;
+            flex-shrink: 0;
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(74, 85, 104, 0.5);
+            position: sticky;
+            top: 120px;
+            align-self: flex-start;
+            max-height: calc(100vh - 150px);
+            overflow-y: auto;
+            z-index: 120;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+        }
+
+        .toc-collapsed {
+            transform: translateX(-320px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .article-toc h3 {
+            color: #63b3ed;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(99, 179, 237, 0.3);
+        }
+
+        .toc-list {
+            list-style: none;
+        }
+
+        .toc-list li {
+            margin-bottom: 12px;
+        }
+
+        .toc-list a {
+            color: #cbd5e0;
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 1.1rem;
+        }
+
+        .toc-list a:hover {
+            background: rgba(99, 179, 237, 0.15);
+            color: #fff;
+            transform: translateX(5px);
+        }
+
+        .toc-list a::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 6px;
+            width: 6px;
+            background: #63b3ed;
+            border-radius: 50%;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toc-list a:hover::before {
+            opacity: 1;
+            left: 5px;
+        }
+
+        /* 文章内容样式 */
+        .article-content {
+            flex: 1;
+        }
+
+        .article-feature {
+            background: rgba(30, 41, 59, 0.7);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(74, 85, 104, 0.3);
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .article-feature::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, #63b3ed, #4299e1);
+        }
+
+        .article-header {
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(74, 85, 104, 0.3);
+            text-align: center;
+        }
+
+        .article-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #90cdf4;
+            background: linear-gradient(to right, #63b3ed, #90cdf4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .article-header .author {
+            color: #a0aec0;
+            font-size: 1.2rem;
+        }
+
+        .article-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .article-section h3 {
+            font-size: 1.8rem;
+            color: #63b3ed;
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(74, 85, 104, 0.3);
+        }
+
+        .article-section p {
+            color: #cbd5e0;
+            font-size: 1.15rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .article-section ul {
+            margin: 1.5rem 0 1.5rem 2rem;
+        }
+
+        .article-section li {
+            color: #cbd5e0;
+            font-size: 1.15rem;
+            line-height: 1.8;
+            margin-bottom: 0.8rem;
+            position: relative;
+            padding-left: 1.5rem;
+            text-align: left;
+        }
+
+        .article-section li::before {
+            content: '•';
+            color: #63b3ed;
+            font-size: 1.5rem;
+            position: absolute;
+            left: 0;
+            top: -2px;
+        }
+
+        /* VS Code风格的C++代码样式 */
+        .source {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            border-left: 4px solid #63b3ed;
+            position: relative;
+        }
+
+        .source::before {
+            content: 'C++';
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #63b3ed;
+            color: white;
+            padding: 4px 12px;
+            font-size: 0.9rem;
+            border-radius: 0 0 0 8px;
+        }
+
+        /* 代码高亮颜色 */
+        .source .keyword { color: #569cd6; } /* 关键字 - 蓝色 */
+        .source .type { color: #4ec9b0; }    /* 类型 - 青色 */
+        .source .string { color: #ce9178; }  /* 字符串 - 橙色 */
+        .source .comment { color: #6a9955; } /* 注释 - 绿色 */
+        .source .function { color: #dcdcaa; } /* 函数名 - 浅黄色 */
+        .source .preprocessor { color: #c586c0; } /* 预处理器 - 紫色 */
+        .source .number { color: #b5cea8; }  /* 数字 - 浅绿色 */
+        .source .operator { color: #d4d4d4; } /* 操作符 - 浅灰色 */
+        .source .include { color: #c586c0; } /* include - 紫色 */
+        .source .symbol { color: #ffee00; } /* 符号 - 金黄色 */
+        .source .variable { color: #31adffe7; } /*变量 - 浅蓝色 */
+
+        /* 代码行号 */
+        .source .line-numbers {
+            display: inline-block;
+            width: 40px;
+            text-align: right;
+            padding-right: 15px;
+            margin-right: 15px;
+            color: #6a9955;
+            border-right: 1px solid #3c3c3c;
+            user-select: none;
+        }
+
+        /* 图片美化 */
+        .article-img {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            transition: all 0.4s ease;
+            display: block;
+            margin: 1.5rem 0;
+            border: 1px solid rgba(74, 85, 104, 0.3);
+        }
+
+        .article-img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .img-container {
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .img-caption {
+            color: #a0aec0;
+            font-size: 1rem;
+            margin-top: 0.5rem;
+            font-style: italic;
+            text-align: left;
+        }
+
+        /* 参考文献样式 */
+        .references {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(74, 85, 104, 0.3);
+        }
+
+        .references h4 {
+            font-size: 1.5rem;
+            color: #63b3ed;
+            margin-bottom: 1.2rem;
+        }
+
+        .references a {
+            color: #90cdf4;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 1rem;
+            padding: 10px 15px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .references a:hover {
+            background: rgba(99, 179, 237, 0.2);
+            transform: translateX(5px);
+        }
+
+        /* 下一篇按钮 */
+        .next-article {
+            text-align: right;
+            margin-top: 2.5rem;
+        }
+
+        .next-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 25px;
+            background: linear-gradient(to right, #63b3ed, #4299e1);
+            color: white;
+            font-weight: 600;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .next-btn:hover {
+            background: linear-gradient(to right, #4299e1, #3182ce);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 箭头图标 - 纯CSS实现 */
+        .arrow-right-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            position: relative;
+        }
+
+        .arrow-right-icon::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 0;
+            width: 10px;
+            height: 10px;
+            border-right: 2px solid white;
+            border-top: 2px solid white;
+            transform: translateY(-50%) rotate(45deg);
+        }
+
+        footer {
+            background: rgba(15, 23, 42, 0.95);
+            padding: 2.5rem 2rem;
+            color: #a0aec0;
+            border-top: 1px solid rgba(74, 85, 104, 0.4);
+            margin-top: 4rem;
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            max-width: 1400px;
+            margin: 0 auto;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: flex-start;
+            gap: 40px;
+        }
+
+        .footer-logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .footer-logo:hover {
+            transform: rotate(2deg) scale(1.05);
+            box-shadow: 0 8px 20px rgba(99, 179, 237, 0.3);
+        }
+
+        /* 三列链接布局 */
+        .footer-links-container {
+            display: flex;
+            gap: 40px;
+        }
+
+        .footer-links-column {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .footer-links-column h3 {
+            color: #63b3ed;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid rgba(99, 179, 237, 0.3);
+        }
+
+        .footer-links-column a {
+            color: #cbd5e0;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            padding: 8px 15px;
+            border-radius: 8px;
+            background: rgba(30, 41, 59, 0.6);
+            width: fit-content;
+            min-width: 160px;
+        }
+
+        .footer-links-column a:hover {
+            background: rgba(99, 179, 237, 0.2);
+            color: #fff;
+            transform: translateX(8px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer-links-column a::before {
+            content: "»";
+            color: #63b3ed;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-links-column a:hover::before {
+            opacity: 1;
+        }
+
+        .footer-right {
+            text-align: right;
+            min-width: 300px;
+            padding-top: 10px;
+        }
+
+        .footer-right p {
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+
+        .footer-right a {
+            color: #63b3ed;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .footer-right a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #63b3ed;
+            transition: width 0.3s ease;
+        }
+
+        .footer-right a:hover::after {
+            width: 100%;
+        }
+
+        .footer-right a:hover {
+            color: #90cdf4;
+            text-shadow: 0 0 8px rgba(99, 179, 237, 0.4);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1100px) {
+            .footer-container {
+                flex-direction: column;
+                gap: 30px;
+            }
+            
+            .footer-left {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .footer-right {
+                text-align: left;
+                min-width: 100%;
+            }
+        }
+
+        @media (max-width: 992px) {
+            main {
+                flex-direction: column;
+            }
+            
+            .article-toc {
+                width: 100%;
+                position: static;
+                margin-bottom: 2rem;
+            }
+            
+            .toc-toggle {
+                top: 100px;
+                left: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav .container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            nav .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .footer-links-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .article-header h2 {
+                font-size: 2rem;
+            }
+            
+            .article-feature {
+                padding: 1.5rem;
+            }
+            
+            .toc-toggle {
+                width: 35px;
+                height: 35px;
+                top: 90px;
+            }
+            
+            .source {
+                padding: 1rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .article-feature {
+            animation: fadeIn 0.6s ease forwards;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-320px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .toc-animate {
+            animation: slideIn 0.4s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav>
+        <div class="container">
+            <div class="logo">
+                <img class="RoundImg" src="https://cdn.luogu.com.cn/upload/image_hosting/cto5owfw.png"/>
+                曙光将至
+            </div>
+            <div class="nav-links">
+                <a href="https://dawncoming2025.github.io">主页</a>
+                <a href="https://dawncoming2025.github.io/recommand">推荐</a>
+                <a href="https://dawncoming2025.github.io/download">下载</a>
+                <a href="https://dawncoming2025.github.io/blog">博客</a>
+                <a href="https://dawncoming2025.github.io/team">团队</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 目录控制按钮 -->
+    <div class="toc-toggle" id="tocToggle">
+        <span class="list-icon"></span>
+    </div>
+
+    <!-- 主要内容 -->
+    <main>
+        <!-- 文章目录 -->
+        <div class="article-toc" id="articleToc">
+            <h3>
+                文章目录
+            </h3>
+            <ul class="toc-list">
+                <li><a href="#hello">Hello World!</a></li>
+            </ul>
+        </div>
+        
+        <!-- 文章内容 -->
+        <div class="article-content">
+            <div class="article-feature">
+                <div class="article-header">
+                    <h2>C++从入门到进阶-第一个程序</h2>
+                    <p class="author">作者：WangYinxiAlex</p>
+                </div>
+                
+                <div class="article-section" id="hello">
+                    <h3>Hello World!</h3>
+                    <p>众所周知，任何一门编程语言的学习，都是从一个最简单的输出"Hello World"的程序开始。</p>
+                    
+                    <div class="source">
+                        <span class="line-numbers">1</span><span class="preprocessor">#include</span><span class="string">&lt;iostream&gt;</span><br>
+                        <span class="line-numbers">2</span><span class="preprocessor">using</span> <span class="keyword">namespace</span> <span class="type">std</span>;<br>
+                        <span class="line-numbers">3</span><span class="keyword">int</span> <span class="function">main</span><span class="symbol">(){</span><br>
+                        <span class="line-numbers">4</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">cout</span><span class="function">&lt;&lt;</span><span class="string">"Hello,World!"</span><span class="function">&lt;&lt;</span><span class="function">endl</span>;<br>
+                        <span class="line-numbers">5</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="number">0</span>;<br>
+                        <span class="line-numbers">6</span><span class="symbol">}</span>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center;">
+                        <p>将上面的代码复制到Dev-C++中，点击编译运行</p>
+                        <img src="https://s3.uuu.ovh/imgs/2025/07/05/cd216ab0b3744243.png" style="width: 30px; height: 30px; margin: 0 5px;"/>
+                        <p>按钮，您将在控制台看到输出结果：</p>
+                    </div>
+                    <div class="source">
+                        <span class="line-numbers">1</span><span class="string">Hello,World!</span>
+                    </div>
+                </div>
+                
+                <div class="next-article">
+                    <a href="https://dawncoming2025.github.io/blog/BL0003" class="next-btn">
+                        下一篇：C++从入门到进阶-基础语法
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-left">
+                <img class="footer-logo" src="https://cdn.luogu.com.cn/upload/image_hosting/jxawvvuq.png" />
+                <div class="footer-links-container">
+                    <div class="footer-links-column">
+                        <a href="https://dawncoming2025.github.io/help/">帮助中心</a>
+                        <a href="https://dawncoming2025.github.io/help/faq">反馈问题</a>
+                    </div>
+                    <div class="footer-links-column">
+                        <a href="https://dawncoming2025.github.io/team/join">加入我们</a>
+                        <a href="https://dawncoming2025.github.io/help/update">更新日志</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-right">
+                <p>Developed by <a href="https://qm.qq.com/q/kD1XNMw2IK" target="_blank">DawnComing</a></p>
+                <p>&copy; 2025~2035 曙光将至</p>
+                <p>All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 目录控制逻辑
+        document.addEventListener('DOMContentLoaded', function() {
+            const tocToggle = document.getElementById('tocToggle');
+            const articleToc = document.getElementById('articleToc');
+            
+            // 初始状态：目录展开
+            let tocVisible = true;
+            
+            // 切换目录可见性
+            function toggleToc() {
+                tocVisible = !tocVisible;
+                if (tocVisible) {
+                    articleToc.classList.remove('toc-collapsed');
+                    articleToc.classList.add('toc-animate');
+                } else {
+                    articleToc.classList.add('toc-collapsed');
+                }
+            }
+            
+            // 事件监听
+            tocToggle.addEventListener('click', toggleToc);
+            
+            // 点击目录项滚动到对应位置
+            const tocLinks = document.querySelectorAll('.toc-list a');
+            tocLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 100,
+                            behavior: 'smooth'
+                        });
+                        
+                        // 在移动设备上自动关闭目录
+                        if (window.innerWidth < 992) {
+                            toggleToc();
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
